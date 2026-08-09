@@ -1,0 +1,35 @@
+name: Mobile web clone temporary build
+
+on:
+  push:
+    branches:
+      - chatgpt/mobile-web-clone-build
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Extract clone source
+        run: |
+          mkdir -p /tmp/mobile-web-clone
+          unzip -q .chatgpt/mobile-web-clone-source.zip -d /tmp/mobile-web-clone
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.16.0
+          cache: npm
+          cache-dependency-path: /tmp/mobile-web-clone/package.json
+      - name: Install dependencies
+        working-directory: /tmp/mobile-web-clone
+        run: npm install --no-audit --no-fund
+      - name: Test
+        working-directory: /tmp/mobile-web-clone
+        run: npm test
+      - name: Build
+        working-directory: /tmp/mobile-web-clone
+        run: npm run build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: t3code-mobile-web-dist
+          path: /tmp/mobile-web-clone/dist
+          if-no-files-found: error
