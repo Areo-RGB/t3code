@@ -1,9 +1,6 @@
 name: Publish T3 UI clone branch
 
 on:
-  push:
-    branches:
-      - t3_ui_clone
   workflow_dispatch:
 
 permissions:
@@ -11,7 +8,6 @@ permissions:
 
 jobs:
   publish:
-    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -26,7 +22,17 @@ jobs:
 
           cp apps/mobile/modules/t3-terminal/android/src/main/assets/fonts/MesloLGS-NF-Regular.ttf /tmp/MesloLGS-NF-Regular.ttf
           cp apps/mobile/modules/t3-terminal/android/src/main/assets/fonts/MesloLGS-NF-Bold.ttf /tmp/MesloLGS-NF-Bold.ttf
-          cat .chatgpt/t3-ui-source.b64.* | base64 -d > /tmp/t3-ui-source.zip
+          cat \
+            .chatgpt/t3-ui-source.b64.00 \
+            .chatgpt/t3-ui-source.b64.01 \
+            .chatgpt/t3-ui-source.b64.02 \
+            .chatgpt/t3-ui-source.b64.03 \
+            .chatgpt/t3-ui-source.b64.04 \
+            .chatgpt/t3-ui-source.b64.05a \
+            .chatgpt/t3-ui-source.b64.05b \
+            .chatgpt/t3-ui-source.b64.06 \
+            .chatgpt/t3-ui-source.b64.07 \
+            | base64 -d > /tmp/t3-ui-source.zip
           unzip -t /tmp/t3-ui-source.zip >/dev/null
 
           git rm -r -f .
