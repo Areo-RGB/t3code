@@ -1,0 +1,51 @@
+name: Test 7z extraction on Windows 2019
+
+on:
+  push:
+    branches:
+      - t3_ui_clone
+    paths:
+      - '.chatgpt/t3-ui-7z-probe.zip'
+      - '.github/workflows/test-7z-extract.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  extract:
+    runs-on: windows-2019
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+
+      - name: Show 7-Zip version
+        shell: pwsh
+        run: 7z | Select-Object -First 8
+
+      - name: Extract ZIP with 7z
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force extracted | Out-Null
+          7z x .chatgpt/t3-ui-7z-probe.zip -oextracted -y
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Verify extracted contents
+        shell: pwsh
+        run: |
+          $required = @(
+            'extracted/package.json',
+            'extracted/README.txt',
+            'extracted/src/probe.txt'
+          )
+          foreach ($path in $required) {
+            if (-not (Test-Path $path -PathType Leaf)) {
+              throw "Missing extracted file: $path"
+            }
+          }
+          $probe = (Get-Content 'extracted/src/probe.txt' -Raw).Trim()
+          if ($probe -ne 'nested file ok') {
+            throw "Unexpected probe content: $probe"
+          }
+          Get-ChildItem extracted -Recurse | Select-Object FullName, Length
+          Write-Host '7z extraction verification passed.'
