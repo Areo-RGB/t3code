@@ -1,0 +1,43 @@
+name: Publish T3 UI clone branch
+
+on:
+  push:
+    branches:
+      - t3_ui_clone
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: t3_ui_clone
+          fetch-depth: 0
+
+      - name: Rebuild branch as standalone clone
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          cp apps/mobile/modules/t3-terminal/android/src/main/assets/fonts/MesloLGS-NF-Regular.ttf /tmp/MesloLGS-NF-Regular.ttf
+          cp apps/mobile/modules/t3-terminal/android/src/main/assets/fonts/MesloLGS-NF-Bold.ttf /tmp/MesloLGS-NF-Bold.ttf
+          base64 -d .chatgpt/t3-ui-source.b64 > /tmp/t3-ui-source.zip
+          unzip -t /tmp/t3-ui-source.zip >/dev/null
+
+          git rm -r -f .
+          git clean -fdx
+          unzip -q /tmp/t3-ui-source.zip -d .
+          mkdir -p public
+          cp /tmp/MesloLGS-NF-Regular.ttf public/MesloLGS-NF-Regular.ttf
+          cp /tmp/MesloLGS-NF-Bold.ttf public/MesloLGS-NF-Bold.ttf
+
+          git add -A
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "feat: publish light-only T3 UI clone"
+          git push origin HEAD:t3_ui_clone
