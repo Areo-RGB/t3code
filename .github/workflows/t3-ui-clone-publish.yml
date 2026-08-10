@@ -19,24 +19,26 @@ jobs:
           ref: t3_ui_clone
           fetch-depth: 0
 
-      - name: Rebuild branch as standalone clone
+      - name: Publish standalone clone
         shell: bash
         run: |
           set -euo pipefail
 
           cp apps/mobile/modules/t3-terminal/android/src/main/assets/fonts/MesloLGS-NF-Regular.ttf /tmp/MesloLGS-NF-Regular.ttf
           cp apps/mobile/modules/t3-terminal/android/src/main/assets/fonts/MesloLGS-NF-Bold.ttf /tmp/MesloLGS-NF-Bold.ttf
+
           cat \
             .chatgpt/t3-ui-source.b64.00 \
             .chatgpt/t3-ui-source.b64.01 \
             .chatgpt/t3-ui-source.b64.02 \
             .chatgpt/t3-ui-source.b64.03 \
             .chatgpt/t3-ui-source.b64.04 \
-            .chatgpt/t3-ui-source.b64.05a \
-            .chatgpt/t3-ui-source.b64.05b \
+            .chatgpt/t3-ui-source.b64.05 \
             .chatgpt/t3-ui-source.b64.06 \
             .chatgpt/t3-ui-source.b64.07 \
             | base64 -d > /tmp/t3-ui-source.zip
+
+          echo "cb74442d5a9dfd57aa7dec211d1b8e57ec8276781f64a02530bf463d41d8ed22  /tmp/t3-ui-source.zip" | sha256sum -c -
           unzip -t /tmp/t3-ui-source.zip >/dev/null
 
           git rm -r -f .
